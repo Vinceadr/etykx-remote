@@ -5,6 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -53,7 +56,7 @@ jobs:
             ## 📱 Interception Remote — APK Android
 
             ### Installation
-            1. Télécharge **`app-debug.apk`** ci-dessous
+            1. Télécharge **`app-debug.apk`** ci-dessous ⬇️
             2. Sur ton téléphone : Paramètres → Sécurité → **Sources inconnues** ✅
             3. Installe l'APK
             4. Entre l'IP de ton PC (`10.0.108.63`) et le port `5000`
