@@ -18,28 +18,24 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Install Gradle 8.4
+        run: |
+          curl -sL https://services.gradle.org/distributions/gradle-8.4-bin.zip -o /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /opt/gradle
+          echo "/opt/gradle/gradle-8.4/bin" >> $GITHUB_PATH
+
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Download gradle-wrapper.jar
-        run: |
-          mkdir -p android/gradle/wrapper
-          curl -L -o android/gradle/wrapper/gradle-wrapper.jar \
-            "https://github.com/gradle/gradle/raw/v8.4.0/gradle/wrapper/gradle-wrapper.jar" || \
-          wget -O android/gradle/wrapper/gradle-wrapper.jar \
-            "https://services.gradle.org/distributions/gradle-8.4-wrapper.jar" || true
-          # Fallback: generate wrapper with system gradle
-          if [ ! -f android/gradle/wrapper/gradle-wrapper.jar ]; then
-            cd android && gradle wrapper --gradle-version 8.4 --no-daemon
-          fi
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x android/gradlew
+      - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses || true
 
       - name: Build APK
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon
+          gradle assembleDebug --no-daemon
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
@@ -57,14 +53,12 @@ jobs:
             ## 📱 Interception Remote — APK Android
 
             ### Installation
-            1. Télécharge `app-debug.apk`
+            1. Télécharge **`app-debug.apk`** ci-dessous
             2. Sur ton téléphone : Paramètres → Sécurité → **Sources inconnues** ✅
             3. Installe l'APK
-            4. Entre l'IP de ton PC et le port 5000
+            4. Entre l'IP de ton PC (`10.0.108.63`) et le port `5000`
 
-            ### Prérequis
-            - PC et téléphone sur le même Wi-Fi
-            - Serveur Python lancé (automatique au démarrage du PC)
+            > 💡 PC et téléphone doivent être sur le même Wi-Fi
           files: android/app/build/outputs/apk/debug/app-debug.apk
           draft: false
           prerelease: false
