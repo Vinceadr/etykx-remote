@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">RemoteControl PC</string>
+    <string name="app_name">Interception</string>
     <string name="hint_ip">IP du PC (ex: 192.168.1.10)</string>
     <string name="hint_port">Port (défaut: 5000)</string>
     <string name="btn_connect">Se connecter</string>
 </resources>
+
