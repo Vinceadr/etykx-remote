@@ -4,7 +4,7 @@
     android:orientation="vertical" android:gravity="center"
     android:padding="32dp" android:background="#1a1a2e">
 
-    <TextView android:text="RemoteControl PC"
+    <TextView android:text="Interception"
         android:textSize="26sp" android:textColor="#e94560"
         android:textStyle="bold" android:gravity="center"
         android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -42,3 +42,4 @@
         android:padding="16dp"
         android:layout_width="match_parent" android:layout_height="wrap_content"/>
 </LinearLayout>
+

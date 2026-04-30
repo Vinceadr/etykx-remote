@@ -28,7 +28,7 @@ with mss.mss() as sct:
 # ── Conversation history for web chat ──────────────────────────────────
 _web_history = []
 
-AI_SYSTEM = f"""Tu es ETYKX, un assistant IA personnel expert en informatique et cybersécurité,
+AI_SYSTEM = f"""Tu es Interception, un assistant IA personnel expert en informatique et cybersécurité,
 connecté au PC Windows de ton propriétaire (résolution {SCREEN_W}x{SCREEN_H}).
 Tu peux répondre à toutes les questions : code, scripts, cybersécurité, architecture, etc.
 Réponds en markdown. Sois expert, précis et concis. Parle en français sauf si on te parle autrement."""
@@ -210,7 +210,7 @@ HTML = """<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-<title>ETYKX Remote</title>
+<title>Interception Remote</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:#1a1a2e;color:#eee;font-family:sans-serif;overflow:hidden;height:100vh;display:flex;flex-direction:column}
@@ -281,14 +281,14 @@ body{background:#1a1a2e;color:#eee;font-family:sans-serif;overflow:hidden;height
 <!-- AI Chat Panel -->
 <div id="chat-panel">
   <div id="chat-header">
-    <h3>🤖 ETYKX — Assistant IA</h3>
+    <h3>🤖 Interception — Assistant IA</h3>
     <div style="display:flex;gap:8px;align-items:center">
       <button id="chat-clear-btn" onclick="clearChat()" title="Effacer">🗑️</button>
       <button id="chat-close" onclick="toggleChat()">✕</button>
     </div>
   </div>
   <div id="chat-messages">
-    <div class="msg bot">👋 Salut ! Je suis ETYKX, ton assistant IA.<br>Pose-moi n'importe quelle question en informatique, code, cybersécurité...</div>
+    <div class="msg bot">👋 Salut ! Je suis Interception, ton assistant IA.<br>Pose-moi n'importe quelle question en informatique, code, cybersécurité...</div>
   </div>
   <div id="chat-input-area">
     <input id="chat-input" type="text" placeholder="Demande-moi quelque chose..." autocomplete="off">
@@ -481,10 +481,11 @@ if __name__ == '__main__':
     local_ip = sock.gethostbyname(hostname)
     print(f"""
 ╔══════════════════════════════════════════╗
-║           ETYKX Remote — Serveur         ║
+║           Interception Remote — Serveur         ║
 ╠══════════════════════════════════════════╣
 ║  Ouvre sur ton téléphone :               ║
 ║  http://{local_ip}:{PORT:<27} ║
 ╚══════════════════════════════════════════╝
 """)
     socketio.run(app, host='0.0.0.0', port=PORT, debug=False)
+

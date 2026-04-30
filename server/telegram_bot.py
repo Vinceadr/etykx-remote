@@ -62,7 +62,7 @@ ai_client = AsyncOpenAI(
 # ── Conversation memory (per user) ─────────────────────────────────────
 _conversations: dict[int, list[dict]] = {}
 
-SYSTEM_PROMPT = f"""Tu es ETYKX, un assistant IA personnel connecté au PC Windows de ton propriétaire.
+SYSTEM_PROMPT = f"""Tu es Interception, un assistant IA personnel connecté au PC Windows de ton propriétaire.
 Tu as DEUX rôles fusionnés en un :
 
 1. ASSISTANT COPILOT — comme GitHub Copilot : tu réponds aux questions de code, d'architecture,
@@ -292,7 +292,7 @@ async def cmd_help(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if not is_authorized(update):
         return
     await update.message.reply_text(
-        "🤖 *ETYKX — Ton assistant PC*\n\n"
+        "🤖 *Interception — Ton assistant PC*\n\n"
         "*Commandes :*\n"
         "/screenshot — Capture d'écran\n"
         "/clear — Effacer l'historique\n"
@@ -429,6 +429,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
