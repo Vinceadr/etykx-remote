@@ -1,4 +1,4 @@
-import os, io, time, subprocess, json, threading
+﻿import os, io, time, subprocess, json, threading
 from flask import Flask, Response, request, jsonify, render_template_string
 from dotenv import load_dotenv
 import mss
@@ -172,11 +172,11 @@ def ai_clear():
     _web_history.clear()
     return jsonify({"ok": True})
 
-HTML = open(__file__.replace("server.py","ui.html"), encoding="utf-8").read()
+_UI_PATH = __file__.replace("server.py","ui.html")
 
 @app.route("/")
 def index():
-    return HTML
+    return open(_UI_PATH, encoding="utf-8").read()
 
 if __name__ == "__main__":
     import socket as sock
