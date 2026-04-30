@@ -1,0 +1,6 @@
+# Force LF line endings for shell scripts
+gradlew text eol=lf
+android/gradlew text eol=lf
+*.sh text eol=lf
+*.bat text eol=crlf
+*.jar binary
