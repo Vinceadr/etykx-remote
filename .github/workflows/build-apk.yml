@@ -21,6 +21,18 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Download gradle-wrapper.jar
+        run: |
+          mkdir -p android/gradle/wrapper
+          curl -L -o android/gradle/wrapper/gradle-wrapper.jar \
+            "https://github.com/gradle/gradle/raw/v8.4.0/gradle/wrapper/gradle-wrapper.jar" || \
+          wget -O android/gradle/wrapper/gradle-wrapper.jar \
+            "https://services.gradle.org/distributions/gradle-8.4-wrapper.jar" || true
+          # Fallback: generate wrapper with system gradle
+          if [ ! -f android/gradle/wrapper/gradle-wrapper.jar ]; then
+            cd android && gradle wrapper --gradle-version 8.4 --no-daemon
+          fi
+
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
 
@@ -45,17 +57,16 @@ jobs:
             ## 📱 Interception Remote — APK Android
 
             ### Installation
-            1. Télécharge `interception-remote.apk`
-            2. Sur ton téléphone : Paramètres → Sécurité → Sources inconnues ✅
+            1. Télécharge `app-debug.apk`
+            2. Sur ton téléphone : Paramètres → Sécurité → **Sources inconnues** ✅
             3. Installe l'APK
             4. Entre l'IP de ton PC et le port 5000
 
             ### Prérequis
             - PC et téléphone sur le même Wi-Fi
-            - Serveur Python lancé : `.\start.ps1`
+            - Serveur Python lancé (automatique au démarrage du PC)
           files: android/app/build/outputs/apk/debug/app-debug.apk
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
