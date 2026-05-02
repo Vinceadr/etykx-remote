@@ -3,8 +3,7 @@ package com.remotecontrol;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.nsd.NsdManager;
-import android.net.nsd.NsdServiceInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -12,25 +11,22 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.json.JSONObject;
 
 public class SetupActivity extends AppCompatActivity {
-    private static final String PREFS         = "rc_prefs";
-    private static final int    DISCOVER_PORT = 5001;
-    private static final String NSD_SERVICE   = "_interception._tcp";
-    private static final int    TIMEOUT_MS    = 12000;
+    private static final String PREFS    = "rc_prefs";
+    private static final int    PORT     = 5000;
+    private static final int    TIMEOUT  = 600; // ms per host
 
-    private EditText  etIp, etPort;
-    private Button    btnConnect, btnDiscover;
-    private TextView  tvStatus;
+    private EditText      etIp, etPort;
+    private Button        btnConnect, btnDiscover;
+    private TextView      tvStatus;
     private final AtomicBoolean found = new AtomicBoolean(false);
-
-    private NsdManager                   nsdManager;
-    private NsdManager.DiscoveryListener nsdListener;
+    private ExecutorService scanPool;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,73 +53,71 @@ public class SetupActivity extends AppCompatActivity {
                     .putExtra("url", "http://" + ip + ":" + port));
         });
 
-        btnDiscover.setOnClickListener(v -> startDiscovery());
+        btnDiscover.setOnClickListener(v -> startScan());
 
-        if (prefs.getString("ip", "").isEmpty()) startDiscovery();
+        if (prefs.getString("ip", "").isEmpty()) startScan();
     }
 
-    private void startDiscovery() {
+    private void startScan() {
+        if (scanPool != null && !scanPool.isShutdown()) scanPool.shutdownNow();
         found.set(false);
         btnDiscover.setEnabled(false);
         btnDiscover.setText("Scan...");
-        tvStatus.setText("Recherche du PC sur le reseau...");
+        tvStatus.setText("Scan du reseau en cours...");
 
-        // Method 1: mDNS via NsdManager
-        startNsdDiscovery();
+        // Determine subnet from phone Wi-Fi IP
+        String subnet = getSubnet();
+        if (subnet == null) {
+            tvStatus.setText("Wi-Fi non connecte. Connecte-toi au Wi-Fi du PC.");
+            btnDiscover.setEnabled(true);
+            btnDiscover.setText("Detecter");
+            return;
+        }
 
-        // Method 2: UDP broadcast listener (fallback)
-        new Thread(() -> {
-            try (DatagramSocket socket = new DatagramSocket(DISCOVER_PORT)) {
-                socket.setBroadcast(true);
-                socket.setSoTimeout(TIMEOUT_MS);
-                byte[] buf = new byte[512];
-                DatagramPacket pkt = new DatagramPacket(buf, buf.length);
-                socket.receive(pkt);
-                String json = new String(pkt.getData(), 0, pkt.getLength());
-                JSONObject obj = new JSONObject(json);
-                if ("interception".equals(obj.optString("service"))) {
-                    onPcFound(pkt.getAddress().getHostAddress(),
-                              String.valueOf(obj.optInt("port", 5000)));
+        final String sub = subnet;
+        scanPool = Executors.newFixedThreadPool(50);
+        final int total = 254;
+        final java.util.concurrent.atomic.AtomicInteger done = new java.util.concurrent.atomic.AtomicInteger(0);
+
+        for (int i = 1; i <= total; i++) {
+            final String ip = sub + i;
+            scanPool.submit(() -> {
+                if (!found.get()) {
+                    try {
+                        URL url = new URL("http://" + ip + ":" + PORT + "/ping");
+                        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                        conn.setConnectTimeout(TIMEOUT);
+                        conn.setReadTimeout(TIMEOUT);
+                        conn.setRequestMethod("GET");
+                        int code = conn.getResponseCode();
+                        conn.disconnect();
+                        if (code == 200) {
+                            onPcFound(ip, String.valueOf(PORT));
+                        }
+                    } catch (Exception ignored) {}
                 }
-            } catch (Exception ignored) { }
-            if (!found.get()) onDiscoveryFailed();
-        }).start();
-
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (!found.get()) onDiscoveryFailed();
-        }, TIMEOUT_MS + 1000);
+                int d = done.incrementAndGet();
+                if (d == total && !found.get()) {
+                    onScanFailed();
+                }
+            });
+        }
     }
 
-    private void startNsdDiscovery() {
-        nsdManager = (NsdManager) getSystemService(Context.NSD_SERVICE);
-        nsdListener = new NsdManager.DiscoveryListener() {
-            @Override public void onDiscoveryStarted(String type) {}
-            @Override public void onDiscoveryStopped(String type) {}
-            @Override public void onStartDiscoveryFailed(String t, int e) {}
-            @Override public void onStopDiscoveryFailed(String t, int e)  {}
-
-            @Override
-            public void onServiceFound(NsdServiceInfo info) {
-                nsdManager.resolveService(info, new NsdManager.ResolveListener() {
-                    @Override public void onResolveFailed(NsdServiceInfo i, int e) {}
-                    @Override
-                    public void onServiceResolved(NsdServiceInfo resolved) {
-                        InetAddress addr = resolved.getHost();
-                        int port = resolved.getPort();
-                        if (addr != null) onPcFound(addr.getHostAddress(), String.valueOf(port));
-                    }
-                });
-            }
-            @Override public void onServiceLost(NsdServiceInfo info) {}
-        };
+    private String getSubnet() {
         try {
-            nsdManager.discoverServices(NSD_SERVICE, NsdManager.PROTOCOL_DNS_SD, nsdListener);
-        } catch (Exception ignored) {}
+            WifiManager wm = (WifiManager) getApplicationContext()
+                    .getSystemService(Context.WIFI_SERVICE);
+            int ip = wm.getConnectionInfo().getIpAddress();
+            if (ip == 0) return null;
+            return String.format("%d.%d.%d.",
+                    ip & 0xFF, (ip >> 8) & 0xFF, (ip >> 16) & 0xFF);
+        } catch (Exception e) { return null; }
     }
 
     private void onPcFound(String ip, String port) {
         if (!found.compareAndSet(false, true)) return;
-        stopNsd();
+        if (scanPool != null) scanPool.shutdownNow();
         getSharedPreferences(PREFS, MODE_PRIVATE).edit()
             .putString("ip", ip).putString("port", port).apply();
         new Handler(Looper.getMainLooper()).post(() -> {
@@ -135,26 +129,18 @@ public class SetupActivity extends AppCompatActivity {
         });
     }
 
-    private void onDiscoveryFailed() {
-        stopNsd();
+    private void onScanFailed() {
         new Handler(Looper.getMainLooper()).post(() -> {
             btnDiscover.setEnabled(true);
             btnDiscover.setText("Detecter");
             if (!found.get())
-                tvStatus.setText("PC non trouve. Verifie que le serveur tourne, puis reessaie.");
+                tvStatus.setText("PC non trouve. Verifie que le serveur tourne sur le PC.");
         });
-    }
-
-    private void stopNsd() {
-        try {
-            if (nsdManager != null && nsdListener != null)
-                nsdManager.stopServiceDiscovery(nsdListener);
-        } catch (Exception ignored) {}
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        stopNsd();
+        if (scanPool != null) scanPool.shutdownNow();
     }
 }

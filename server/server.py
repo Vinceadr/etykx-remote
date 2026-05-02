@@ -185,6 +185,10 @@ def download_apk():
         mimetype="application/vnd.android.package-archive",
         headers={"Content-Disposition": "attachment; filename=interception.apk"}
     )
+@app.route("/ping")
+def ping():
+    return jsonify({"service": "interception", "version": "1"})
+
 @app.route("/")
 def index():
     return open(_UI_PATH, encoding="utf-8").read()
