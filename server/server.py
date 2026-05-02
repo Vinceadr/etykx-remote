@@ -1,4 +1,4 @@
-﻿import os, io, time, subprocess, json, threading
+import os, io, time, subprocess, json, threading
 from flask import Flask, Response, request, jsonify, render_template_string
 from dotenv import load_dotenv
 import mss
@@ -13,7 +13,7 @@ AI_MODEL     = os.getenv('AI_MODEL', 'gpt-4o-mini')
 PORT         = int(os.getenv('PORT', 5000))
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'remotecontrol-secret'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', __import__('secrets').token_hex(32))
 
 mouse_ctrl    = MouseController()
 keyboard_ctrl = KeyboardController()

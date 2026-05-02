@@ -1,3 +1,3 @@
 @echo off
-cd /d ".\Documents\Iris-cours\Projets\Projet-Agent-IA\RemoteControl\server"
-".\AppData\Local\Programs\Python\Python312\pythonw.exe" server.py
+cd /d "%~dp0"
+pythonw server.py

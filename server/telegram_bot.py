@@ -91,7 +91,7 @@ Tu réponds TOUJOURS avec du JSON valide UNIQUEMENT, structure :
 - "chat"          : répondre sans action PC   | params: {{}}
 
 ═══ APPLICATIONS CONNUES ═══
-- CyberWatch  : ./Documents/Iris-cours/Projets/Projet-Agent-IA/cyberwatch/dist/CyberWatch/CyberWatch.exe
+- CyberWatch  : cyberwatch/dist/CyberWatch/CyberWatch.exe
 - Chrome      : start chrome
 - Firefox     : start firefox
 - Notepad     : notepad
