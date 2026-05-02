@@ -230,8 +230,28 @@ def _udp_broadcast():
 
 threading.Thread(target=_udp_broadcast, daemon=True).start()
 
+def _mdns_announce():
+    "`Announce server via mDNS so Android NsdManager can discover it."
+    try:
+        import socket as _sock
+        from zeroconf import ServiceInfo, Zeroconf
+        lan_ip = _get_lan_ip()
+        info = ServiceInfo(
+            "_interception._tcp.local.",
+            "Interception Remote._interception._tcp.local.",
+            addresses=[_sock.inet_aton(lan_ip)],
+            port=PORT,
+            properties={"version": "1"},
+        )
+        zc = Zeroconf()
+        zc.register_service(info)
+        print(f"mDNS announced: Interception Remote @ {lan_ip}:{PORT}")
+    except Exception as e:
+        print(f"mDNS announce failed (non-fatal): {e}")
+
+threading.Thread(target=_mdns_announce, daemon=True).start()
+
 if __name__ == "__main__":
-    import socket as sock
-    local_ip = sock.gethostbyname(sock.gethostname())
+    local_ip = _get_lan_ip()
     print(f"Interception Remote - http://{local_ip}:{PORT}")
     app.run(host="0.0.0.0", port=PORT, threaded=True, debug=False)
