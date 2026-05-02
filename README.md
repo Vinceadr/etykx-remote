@@ -7,7 +7,7 @@ Contrôle ton PC Windows à distance depuis ton téléphone Android, avec stream
 ## ⬇️ Télécharger l'app Android
 
 ### Étape 1 — Autoriser les sources inconnues (une seule fois)
-> **Paramètres** → **Sécurité** → **Installer des applis inconnues** → autorise ton navigateur Chrome/Firefox
+> **Paramètres** → **Sécurité** → **Installer des applis inconnues** → autorise ton navigateur
 
 ### Étape 2 — Télécharger l'APK
 Ouvre ce lien **directement sur ton téléphone** :
@@ -16,39 +16,45 @@ Ouvre ce lien **directement sur ton téléphone** :
 
 Appuie sur **`app-debug.apk`** pour télécharger.
 
-### Étape 3 — Installer
-Ouvre le fichier téléchargé et appuie sur **Installer**.
+### Étape 3 — Installer & Configurer
+Lance l'app → appuie sur **🔍 Détecter le PC automatiquement**
 
-### Étape 4 — Configurer
-Lance l'app → entre :
-- **IP de ton PC** : `10.0.108.63`
-- **Port** : `5000`
+> L'app trouve ton PC toute seule, peu importe l'IP. PC et téléphone doivent être sur le **même Wi-Fi**.
 
-> 💡 Ton PC et ton téléphone doivent être sur le **même Wi-Fi**.
+> Si la détection échoue, lance `start.ps1` sur le PC d'abord, puis réessaie.
+
+---
+
+## 🖥️ Démarrer le serveur PC
+
+```powershell
+.\start.ps1
+```
+
+L'IP à utiliser s'affiche dans le terminal. Le serveur **diffuse son IP automatiquement** sur le réseau local — l'app Android la détecte sans configuration manuelle.
 
 ---
 
 ## 🌐 Interface Web (alternative sans APK)
 
-Ouvre directement dans le navigateur de ton téléphone :
+Lance `start.ps1` → l'IP s'affiche → ouvre dans le navigateur du téléphone :
 
 ```
-http://10.0.108.63:5000
+http://<IP-affichée>:5000
 ```
 
 - **Touch** → déplace la souris
 - **Tap** → clic gauche
 - **Double tap** → double clic
-- **Appui long** → clic droit
+- **Appui long (650ms)** → clic droit
+- **Appui très long (950ms)** → drag & drop
 - **2 doigts** → scroll
-- **⌨️** → ouvre le clavier virtuel
-- **🤖** → chat avec l'assistant IA
+- **KB** → ouvre le clavier virtuel
+- **AI** → chat avec l'assistant IA
 
 ---
 
 ## 💬 Bot Telegram — @interception_bot
-
-Parle naturellement à ton bot depuis n'importe où :
 
 | Ce que tu écris | Ce que ça fait |
 |---|---|
@@ -61,16 +67,12 @@ Parle naturellement à ton bot depuis n'importe où :
 | `ferme la fenêtre active` | Alt+F4 |
 | `/screenshot` | Screenshot immédiat |
 | `/clear` | Efface l'historique IA |
-| `explique-moi Python` | 🤖 Assistant IA (n'importe quelle question) |
-
-> ⚠️ Les actions sensibles demandent une **confirmation** via boutons Telegram.
 
 ---
 
 ## 🔄 Démarrage automatique
 
 Le serveur et le bot Telegram **se lancent automatiquement** à chaque démarrage de Windows.
-Tu n'as rien à faire — l'app est toujours disponible dès que le PC est allumé et connecté au Wi-Fi.
 
 ---
 
@@ -79,7 +81,7 @@ Tu n'as rien à faire — l'app est toujours disponible dès que le PC est allum
 ```
 RemoteControl/
 ├── server/
-│   ├── server.py          # Serveur web Flask (streaming + contrôle)
+│   ├── server.py          # Serveur web Flask (streaming + contrôle + broadcast UDP)
 │   ├── telegram_bot.py    # Bot Telegram + IA GitHub Models
 │   ├── requirements.txt
 │   ├── .env               # Tes secrets (ne pas partager !)

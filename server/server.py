@@ -178,6 +178,23 @@ _UI_PATH = __file__.replace("server.py","ui.html")
 def index():
     return open(_UI_PATH, encoding="utf-8").read()
 
+
+def _udp_broadcast():
+    """Broadcast server presence on LAN so the Android app can auto-discover the IP."""
+    import socket as _sock
+    s = _sock.socket(_sock.AF_INET, _sock.SOCK_DGRAM)
+    s.setsockopt(_sock.SOL_SOCKET, _sock.SO_BROADCAST, 1)
+    s.setsockopt(_sock.SOL_SOCKET, _sock.SO_REUSEADDR, 1)
+    payload = json.dumps({"service": "interception", "port": PORT}).encode()
+    while True:
+        try:
+            s.sendto(payload, ("<broadcast>", 5001))
+        except Exception:
+            pass
+        time.sleep(4)
+
+threading.Thread(target=_udp_broadcast, daemon=True).start()
+
 if __name__ == "__main__":
     import socket as sock
     local_ip = sock.gethostbyname(sock.gethostname())
