@@ -2,27 +2,27 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Interception</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden}
-body{background:#1a1a2e;color:#eee;font-family:sans-serif;display:flex;flex-direction:column}
+html{height:100%}
+body{height:100%;height:100dvh;background:#1a1a2e;color:#eee;font-family:sans-serif;display:flex;flex-direction:column;overflow:hidden}
 #bar{display:flex;gap:4px;padding:5px 6px;background:#16213e;flex-wrap:wrap;align-items:center;flex-shrink:0;z-index:10}
-.b{padding:8px 11px;border:none;border-radius:8px;background:#0f3460;color:#fff;font-size:12px;cursor:pointer;touch-action:manipulation;user-select:none;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.b{padding:8px 11px;border:none;border-radius:8px;background:#0f3460;color:#fff;font-size:12px;cursor:pointer;touch-action:manipulation;user-select:none;flex-shrink:0}
 .b:active{background:#e94560}
 .b.red{background:#c0392b}
-#sw{flex:1;position:relative;overflow:hidden;background:#000;min-height:0}
-#sc{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;touch-action:none}
-#ov{position:absolute;top:0;left:0;right:0;bottom:0;z-index:5;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-#cur{position:absolute;width:18px;height:18px;border:3px solid #e94560;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);z-index:6;display:none;background:rgba(233,69,96,.3)}
-#dbg{position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,.85);color:#0f0;font-size:10px;padding:4px 8px;z-index:200;display:none;font-family:monospace}
+#sw{flex:1;position:relative;overflow:hidden;background:#111;min-height:0;cursor:none}
+#sc{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:100%;max-height:100%;display:block;pointer-events:none;touch-action:none}
+#ov{position:absolute;top:0;left:0;right:0;bottom:0;z-index:5;touch-action:none;user-select:none;-webkit-user-select:none;cursor:none}
+#cur{position:absolute;width:16px;height:16px;border:2px solid #e94560;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);z-index:6;display:none;background:rgba(233,69,96,.25)}
+#loader{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#555;font-size:13px;z-index:3;text-align:center;pointer-events:none}
+#st{font-size:10px;padding:3px 8px;background:#330000;border-radius:4px;color:#f44;flex-shrink:0;font-weight:bold;margin-left:auto;min-width:60px;text-align:center}
+#st.ok{background:#003300;color:#0f0}
 #kba{display:none;padding:6px;background:#16213e;flex-shrink:0}
 #kbi{width:100%;padding:8px;background:#0f3460;border:1px solid #e94560;border-radius:8px;color:#fff;font-size:16px}
-#st{font-size:10px;padding:3px 8px;background:#003300;border-radius:4px;color:#0f0;flex-shrink:0;font-weight:bold;margin-left:auto}
-/* Chat */
-#fab{position:fixed;bottom:16px;right:16px;width:48px;height:48px;border-radius:50%;background:#e94560;border:none;color:#fff;font-size:20px;cursor:pointer;z-index:100;touch-action:manipulation}
-#cp{position:fixed;bottom:0;left:0;right:0;height:65vh;background:#16213e;border-radius:16px 16px 0 0;z-index:99;transform:translateY(100%);transition:transform .25s;display:flex;flex-direction:column}
+#fab{position:fixed;bottom:20px;right:16px;width:48px;height:48px;border-radius:50%;background:#e94560;border:none;color:#fff;font-size:18px;cursor:pointer;z-index:100;touch-action:manipulation;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+#cp{position:fixed;bottom:0;left:0;right:0;height:65dvh;background:#16213e;border-radius:16px 16px 0 0;z-index:99;transform:translateY(100%);transition:transform .25s;display:flex;flex-direction:column}
 #cp.open{transform:translateY(0)}
 #ch{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #0f3460;flex-shrink:0}
 #ch h3{font-size:14px;color:#e94560}
@@ -43,15 +43,15 @@ body{background:#1a1a2e;color:#eee;font-family:sans-serif;display:flex;flex-dire
   <button class="b" onclick="KK('ctrl+c')">Copy</button>
   <button class="b" onclick="KK('ctrl+v')">Paste</button>
   <button class="b" onclick="KK('ctrl+z')">Undo</button>
-  <button class="b" onclick="KK('alt+F4')">X</button>
+  <button class="b" onclick="KK('alt+F4')">X Win</button>
   <button class="b" onclick="M('vol_down')">V-</button>
   <button class="b" onclick="M('vol_up')">V+</button>
-  <button class="b red" onclick="testClick()">TEST</button>
-  <span id="st">...</span>
+  <span id="st">CONN...</span>
 </div>
 
 <div id="sw">
-  <img id="sc" src="/screenshot?t=0" alt="">
+  <img id="sc" src="" alt="">
+  <div id="loader">Connexion au PC...</div>
   <div id="ov"></div>
   <div id="cur"></div>
 </div>
@@ -60,263 +60,240 @@ body{background:#1a1a2e;color:#eee;font-family:sans-serif;display:flex;flex-dire
   <input id="kbi" type="text" placeholder="Taper..." autocomplete="off" spellcheck="false">
 </div>
 
-<div id="dbg" id="dbg">touches:0 | last:- | fetch:- | rect:-</div>
 <button id="fab" onclick="tgl()">AI</button>
 
 <div id="cp">
   <div id="ch">
     <h3>Interception AI</h3>
-    <button onclick="tgl()" style="background:none;border:none;color:#aaa;font-size:18px">X</button>
+    <button onclick="tgl()" style="background:none;border:none;color:#aaa;font-size:18px;cursor:pointer">X</button>
   </div>
-  <div id="cms"><div class="m b">Bonjour ! Pose une question...</div></div>
+  <div id="cms"><div class="m b">Bonjour ! Pose une question ou demande une action PC...</div></div>
   <div id="cia">
-    <input id="cin" type="text" placeholder="Question...">
+    <input id="cin" type="text" placeholder="Question ou commande...">
     <button id="csb" onclick="ai()">GO</button>
   </div>
 </div>
 
 <script>
-var dbgEl  = document.getElementById('dbg');
-var stEl   = document.getElementById('st');
-var touchN = 0;
-var lastFetch = '?';
+var stEl    = document.getElementById('st');
+var imgEl   = document.getElementById('sc');
+var loader  = document.getElementById('loader');
+var ovEl    = document.getElementById('ov');
+var curEl   = document.getElementById('cur');
+var swEl    = document.getElementById('sw');
 
-function dbg(msg) {
-  dbgEl.style.display = 'block';
-  dbgEl.textContent = msg;
-}
-
-// ─── HTTP ────────────────────────────────────────────────────────────────────
+// ── HTTP helpers ──────────────────────────────────────────────────────────────
 function post(url, data) {
-  fetch(url, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify(data)
-  }).then(function(r){ lastFetch = r.status; }).catch(function(e){ lastFetch = 'ERR:'+e.message; });
+  fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) })
+    .catch(function(){});
 }
 
-// Test connexion au démarrage
-fetch('/screenshot').then(function(){
-  stEl.textContent = 'ACTIF';
-  stEl.style.color = '#0f0';
-}).catch(function(){
-  stEl.textContent = 'OFFLINE';
-  stEl.style.color = '#f44';
+// ── Screenshot polling ────────────────────────────────────────────────────────
+var busy = false, failCount = 0, frameDelay = 100;
+function refresh() {
+  if (busy) return;
+  busy = true;
+  var t0 = Date.now();
+  var i = new Image();
+  i.onload = function() {
+    imgEl.src = i.src;
+    loader.style.display = 'none';
+    if (failCount > 0) { stEl.textContent = 'ACTIF'; stEl.className = 'ok'; }
+    failCount = 0;
+    // Adaptive frame rate: aim for ~10fps, adjust based on load time
+    var elapsed = Date.now() - t0;
+    frameDelay = Math.max(80, Math.min(300, elapsed * 1.2));
+    busy = false;
+    setTimeout(refresh, frameDelay);
+  };
+  i.onerror = function() {
+    failCount++;
+    busy = false;
+    if (failCount === 1) { stEl.textContent = 'OFF'; stEl.className = ''; loader.style.display = 'block'; loader.textContent = 'Reconnexion...'; }
+    setTimeout(refresh, Math.min(1500 * failCount, 8000));
+  };
+  i.src = '/screenshot?t=' + Date.now();
+}
+
+// Test initial et lancement
+fetch('/screenshot').then(function(r) {
+  if (r.ok) { stEl.textContent = 'ACTIF'; stEl.className = 'ok'; refresh(); }
+  else { stEl.textContent = 'ERR'; stEl.className = ''; setTimeout(refresh, 1000); }
+}).catch(function() {
+  stEl.textContent = 'OFF'; stEl.className = '';
+  loader.style.display = 'block';
+  loader.textContent = 'Serveur inaccessible — vérifie que PC et téléphone sont sur le même Wi-Fi';
+  setTimeout(refresh, 2000);
 });
 
-// Bouton TEST: déplace souris au centre
-function testClick() {
-  stEl.textContent = 'TEST...';
-  fetch('/ctrl/move', {method:'POST',headers:{'Content-Type':'application/json'},body:'{"x":0.5,"y":0.5}'})
-    .then(function(r){ stEl.textContent = 'TEST:'+r.status; stEl.style.color = r.status===204?'#0f0':'#f44'; })
-    .catch(function(e){ stEl.textContent = 'ERR:'+e.message; stEl.style.color='#f44'; });
-}
-
-// ─── Calcul position (corrige object-fit:contain) ───────────────────────────
-var scEl = document.getElementById('sc');
-
-function getImgRect() {
-  var el = scEl;
-  var er = el.getBoundingClientRect();
-  var nw = el.naturalWidth  || 1920;
-  var nh = el.naturalHeight || 1080;
+// ── Calcul position relative a l image ───────────────────────────────────────
+function getPos(clientX, clientY) {
+  var sw = swEl.getBoundingClientRect();
+  var nw = imgEl.naturalWidth  || 1920;
+  var nh = imgEl.naturalHeight || 1080;
   var nr = nw / nh;
-  var cr = er.width / er.height;
+  var cr = sw.width / sw.height;
   var iw, ih, ix, iy;
-  if (nr > cr) {
-    iw = er.width;
-    ih = er.width / nr;
-    ix = er.left;
-    iy = er.top + (er.height - ih) / 2;
-  } else {
-    ih = er.height;
-    iw = er.height * nr;
-    ix = er.left + (er.width - iw) / 2;
-    iy = er.top;
-  }
-  return {x:ix, y:iy, w:iw, h:ih};
-}
-
-function relPos(touch) {
-  var r = getImgRect();
-  if (r.w < 1 || r.h < 1) return null;
+  if (nr > cr) { iw=sw.width; ih=sw.width/nr; ix=sw.left; iy=sw.top+(sw.height-ih)/2; }
+  else         { ih=sw.height; iw=sw.height*nr; ix=sw.left+(sw.width-iw)/2; iy=sw.top; }
   return {
-    x: Math.max(0, Math.min(1, (touch.clientX - r.x) / r.w)),
-    y: Math.max(0, Math.min(1, (touch.clientY - r.y) / r.h))
+    x: Math.max(0, Math.min(1, (clientX - ix) / iw)),
+    y: Math.max(0, Math.min(1, (clientY - iy) / ih))
   };
 }
 
-// ─── Touch Control ───────────────────────────────────────────────────────────
-var ov  = document.getElementById('ov');
-var cur = document.getElementById('cur');
-
-var touchT0 = 0, touchP0 = null, lastPos = {x:0.5,y:0.5};
-var moved = false, dragging = false;
-var tapCount = 0, tapTimer = null;
-var lpTimer = null, dpTimer = null;
-
-function showCur(touch) {
-  var r = getImgRect();
-  cur.style.left = (touch.clientX - r.x + r.x - (parseFloat(getComputedStyle(document.getElementById('sw')).paddingLeft)||0)) + 'px';
-  cur.style.top  = (touch.clientY - r.y) + 'px';
-  // Simplifié: position relative à #sw
-  var sw = document.getElementById('sw').getBoundingClientRect();
-  cur.style.left = (touch.clientX - sw.left) + 'px';
-  cur.style.top  = (touch.clientY - sw.top) + 'px';
-  cur.style.display = 'block';
+function showCur(clientX, clientY) {
+  var sw = swEl.getBoundingClientRect();
+  curEl.style.left = (clientX - sw.left) + 'px';
+  curEl.style.top  = (clientY - sw.top)  + 'px';
+  curEl.style.display = 'block';
 }
 
-ov.addEventListener('touchstart', function(e) {
+// ── Touch events (mobile) ────────────────────────────────────────────────────
+var touchT0=0, touchP0=null, lastPos={x:.5,y:.5}, moved=false, dragging=false;
+var tapCount=0, tapTimer=null, lpTimer=null, dragTimer=null, dpDist=0;
+var rightClicked=false;
+
+ovEl.addEventListener('touchstart', function(e) {
   e.preventDefault();
-  touchN++;
-
   if (e.touches.length === 2) {
-    clearTimeout(lpTimer);
-    var dx = e.touches[1].clientX - e.touches[0].clientX;
-    var dy = e.touches[1].clientY - e.touches[0].clientY;
-    dpTimer = Math.sqrt(dx*dx + dy*dy);
-    return;
+    clearTimeout(lpTimer); clearTimeout(dragTimer);
+    var dx=e.touches[1].clientX-e.touches[0].clientX, dy=e.touches[1].clientY-e.touches[0].clientY;
+    dpDist = Math.sqrt(dx*dx+dy*dy); return;
   }
-
-  var t   = e.touches[0];
-  var pos = relPos(t);
-  if (!pos) { dbg('WARN: relPos null rect='+JSON.stringify(scEl.getBoundingClientRect())); return; }
-
-  touchT0  = Date.now();
-  touchP0  = pos;
-  lastPos  = pos;
-  moved    = false;
-
-  showCur(t);
+  var t=e.touches[0], pos=getPos(t.clientX, t.clientY);
+  touchT0=Date.now(); touchP0=pos; lastPos=pos; moved=false; rightClicked=false;
+  showCur(t.clientX, t.clientY);
   post('/ctrl/move', pos);
 
-  dbg('TOUCH #'+touchN+' x='+pos.x.toFixed(2)+' y='+pos.y.toFixed(2));
-
+  // Long press → right click at 650ms
   clearTimeout(lpTimer);
   lpTimer = setTimeout(function() {
-    if (!moved) {
+    if (!moved && !dragging) {
+      rightClicked=true;
+      clearTimeout(dragTimer);
       post('/ctrl/click', {x:lastPos.x, y:lastPos.y, right:true});
       navigator.vibrate && navigator.vibrate([30,15,30]);
-      cur.style.borderColor = '#f80';
-      setTimeout(function(){ cur.style.borderColor='#e94560'; }, 500);
-      dbg('RIGHT CLICK x='+lastPos.x.toFixed(2)+' y='+lastPos.y.toFixed(2));
+      curEl.style.borderColor='#f80'; setTimeout(function(){curEl.style.borderColor='#e94560';},500);
     }
-  }, 700);
+  }, 650);
 
-}, {passive:false});
-
-ov.addEventListener('touchmove', function(e) {
-  e.preventDefault();
-
-  if (e.touches.length === 2) {
-    var dx = e.touches[1].clientX - e.touches[0].clientX;
-    var dy = e.touches[1].clientY - e.touches[0].clientY;
-    var d2 = Math.sqrt(dx*dx + dy*dy);
-    var dl = dpTimer - d2;
-    if (Math.abs(dl) > 8) { post('/ctrl/scroll', {dy: dl>0?-3:3}); dpTimer=d2; }
-    return;
-  }
-
-  var t = e.touches[0];
-  var pos = relPos(t);
-  if (!pos) return;
-
-  showCur(t);
-
-  var dx2 = Math.abs(pos.x - touchP0.x);
-  var dy2 = Math.abs(pos.y - touchP0.y);
-  if (dx2 > 0.003 || dy2 > 0.003) { moved=true; clearTimeout(lpTimer); }
-
-  lastPos = pos;
-  post(dragging ? '/ctrl/drag' : '/ctrl/move', pos);
-
-}, {passive:false});
-
-ov.addEventListener('touchend', function(e) {
-  e.preventDefault();
-  clearTimeout(lpTimer);
-  cur.style.display = 'none';
-
-  if (dragging) {
-    post('/ctrl/drag', {x:lastPos.x, y:lastPos.y, end:true});
-    dragging = false;
-    dbg('DRAG END');
-    return;
-  }
-
-  var dt = Date.now() - touchT0;
-  if (!moved && dt < 500 && lastPos) {
-    tapCount++;
-    dbg('TAP #'+tapCount+' dt='+dt+'ms x='+lastPos.x.toFixed(2)+' y='+lastPos.y.toFixed(2));
-    if (tapCount === 1) {
-      tapTimer = setTimeout(function() {
-        post('/ctrl/click', lastPos);
-        dbg('CLICK SENT x='+lastPos.x.toFixed(2)+' y='+lastPos.y.toFixed(2));
-        tapCount = 0;
-      }, 220);
-    } else {
-      clearTimeout(tapTimer);
-      post('/ctrl/click', {x:lastPos.x, y:lastPos.y, double:true});
-      dbg('DOUBLE CLICK');
-      tapCount = 0;
-    }
-  } else {
-    tapCount = 0;
-    clearTimeout(tapTimer);
-  }
-}, {passive:false});
-
-// Drag via long hold (800ms) sans bouger
-ov.addEventListener('touchstart', function(e) {
-  if (e.touches.length !== 1) return;
-  var t = e.touches[0];
-  var pos = relPos(t);
-  if (!pos) return;
-  setTimeout(function() {
-    if (!moved && !dragging) {
-      dragging = true;
-      post('/ctrl/drag', {x:pos.x, y:pos.y, start:true});
+  // Very long press → drag mode at 950ms (only if no right-click happened)
+  clearTimeout(dragTimer);
+  dragTimer = setTimeout(function() {
+    if (!moved && !rightClicked && !dragging) {
+      dragging=true;
+      post('/ctrl/drag', {x:lastPos.x, y:lastPos.y, start:true});
       navigator.vibrate && navigator.vibrate(80);
-      dbg('DRAG START');
+      curEl.style.borderColor='#0af'; setTimeout(function(){curEl.style.borderColor='#e94560';},500);
     }
-  }, 800);
-}, {passive:true});
+  }, 950);
+}, {passive:false});
 
-// ─── Clavier ─────────────────────────────────────────────────────────────────
+ovEl.addEventListener('touchmove', function(e) {
+  e.preventDefault();
+  if (e.touches.length === 2) {
+    var dx=e.touches[1].clientX-e.touches[0].clientX, dy=e.touches[1].clientY-e.touches[0].clientY;
+    var d2=Math.sqrt(dx*dx+dy*dy), dl=dpDist-d2;
+    if (Math.abs(dl)>8) { post('/ctrl/scroll',{dy:dl>0?-3:3}); dpDist=d2; } return;
+  }
+  var t=e.touches[0], pos=getPos(t.clientX, t.clientY);
+  showCur(t.clientX, t.clientY);
+  if (Math.abs(pos.x-touchP0.x)>.003 || Math.abs(pos.y-touchP0.y)>.003) {
+    moved=true;
+    clearTimeout(lpTimer);
+    clearTimeout(dragTimer);
+  }
+  lastPos=pos;
+  post(dragging?'/ctrl/drag':'/ctrl/move', pos);
+}, {passive:false});
+
+ovEl.addEventListener('touchend', function(e) {
+  e.preventDefault();
+  clearTimeout(lpTimer); clearTimeout(dragTimer); curEl.style.display='none';
+  if (dragging) { post('/ctrl/drag',{x:lastPos.x,y:lastPos.y,end:true}); dragging=false; return; }
+  if (rightClicked) { rightClicked=false; return; }
+  var dt=Date.now()-touchT0;
+  if (!moved && dt<500 && lastPos) {
+    tapCount++;
+    if (tapCount===1) {
+      tapTimer=setTimeout(function(){ post('/ctrl/click',lastPos); tapCount=0; },220);
+    } else {
+      clearTimeout(tapTimer); post('/ctrl/click',{x:lastPos.x,y:lastPos.y,double:true}); tapCount=0;
+    }
+  } else { tapCount=0; clearTimeout(tapTimer); }
+}, {passive:false});
+
+// ── Mouse events (PC browser) ─────────────────────────────────────────────────
+var mouseDown=false, mouseLastPos={x:.5,y:.5}, mouseMoved=false, mouseT0=0;
+var mouseTapTimer=null, mouseTapCount=0;
+
+ovEl.addEventListener('mousedown', function(e) {
+  e.preventDefault();
+  mouseDown=true; mouseMoved=false; mouseT0=Date.now();
+  var pos=getPos(e.clientX, e.clientY);
+  mouseLastPos=pos;
+  showCur(e.clientX, e.clientY);
+  post('/ctrl/move', pos);
+});
+
+ovEl.addEventListener('mousemove', function(e) {
+  e.preventDefault();
+  showCur(e.clientX, e.clientY);
+  if (!mouseDown) return;
+  var pos=getPos(e.clientX, e.clientY);
+  if (Math.abs(pos.x-mouseLastPos.x)>.002 || Math.abs(pos.y-mouseLastPos.y)>.002) mouseMoved=true;
+  mouseLastPos=pos;
+  post('/ctrl/move', pos);
+});
+
+ovEl.addEventListener('mouseleave', function() { curEl.style.display='none'; });
+
+document.addEventListener('mouseup', function(e) {
+  if (!mouseDown) return;
+  mouseDown=false; curEl.style.display='none';
+  var dt=Date.now()-mouseT0;
+  if (!mouseMoved && dt<400) {
+    mouseTapCount++;
+    if (mouseTapCount===1) {
+      mouseTapTimer=setTimeout(function(){ post('/ctrl/click',mouseLastPos); mouseTapCount=0; },200);
+    } else {
+      clearTimeout(mouseTapTimer); post('/ctrl/click',{x:mouseLastPos.x,y:mouseLastPos.y,double:true}); mouseTapCount=0;
+    }
+  }
+});
+
+ovEl.addEventListener('contextmenu', function(e) {
+  e.preventDefault();
+  post('/ctrl/click', {x:mouseLastPos.x, y:mouseLastPos.y, right:true});
+});
+
+ovEl.addEventListener('wheel', function(e) {
+  e.preventDefault();
+  post('/ctrl/scroll', {dy: e.deltaY > 0 ? -3 : 3});
+}, {passive:false});
+
+// ── Clavier ───────────────────────────────────────────────────────────────────
 function K(k)  { post('/ctrl/key', {key:k}); }
 function KK(c) { post('/ctrl/key', {combo:c}); }
 function M(a)  { fetch('/media/'+a).catch(function(){}); }
 
 function tkb() {
-  var a = document.getElementById('kba');
-  a.style.display = a.style.display==='block' ? 'none' : 'block';
-  if (a.style.display==='block') { document.getElementById('kbi').value=''; document.getElementById('kbi').focus(); }
+  var a=document.getElementById('kba');
+  a.style.display = a.style.display==='block'?'none':'block';
+  if (a.style.display==='block') { var i=document.getElementById('kbi'); i.value=''; i.focus(); }
 }
 
-var kbi = document.getElementById('kbi');
+var kbi=document.getElementById('kbi');
 kbi.addEventListener('keydown', function(e) {
   if (e.key==='Enter')     { K('Enter');     kbi.value=''; return; }
   if (e.key==='Backspace') { K('Backspace');               return; }
 });
 kbi.addEventListener('input', function() {
-  var v = kbi.value;
-  if (v.length > 0) { post('/ctrl/type', {text:v}); kbi.value=''; }
+  var v=kbi.value; if (v.length>0) { post('/ctrl/type',{text:v}); kbi.value=''; }
 });
 
-// ─── Ecran ───────────────────────────────────────────────────────────────────
-var imgEl = document.getElementById('sc');
-var busy  = false;
-function refresh() {
-  if (busy) return;
-  busy = true;
-  var i  = new Image();
-  i.onload = function() { imgEl.src = i.src; busy=false; setTimeout(refresh,80); };
-  i.onerror= function() { busy=false; setTimeout(refresh,1500); };
-  i.src = '/screenshot?t=' + Date.now();
-}
-refresh();
-
-// ─── Chat ────────────────────────────────────────────────────────────────────
+// ── Chat AI ───────────────────────────────────────────────────────────────────
 function tgl() { document.getElementById('cp').classList.toggle('open'); }
 function am(w,h) {
   var b=document.getElementById('cms'),d=document.createElement('div');
@@ -324,12 +301,13 @@ function am(w,h) {
 }
 function md(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/```([\s\S]*?)```/g,'<pre style="background:#0a1a2e;padding:6px;border-radius:4px;overflow-x:auto;font-size:10px">$1</pre>')
-    .replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+    .replace(/```([\s\S]*?)```/g,'<pre style="background:#0a1a2e;padding:6px;border-radius:4px;overflow-x:auto;font-size:10px;white-space:pre-wrap">$1</pre>')
+    .replace(/`([^`]+)`/g,'<code style="background:#0a1a2e;padding:1px 4px;border-radius:3px">$1</code>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
 }
 async function ai() {
   var inp=document.getElementById('cin'), msg=inp.value.trim();
-  if (!msg) return; inp.value=''; am('u',msg); var t=am('b','...');
+  if (!msg) return; inp.value=''; am('u',md(msg)); var t=am('b','...');
   try {
     var r=await fetch('/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})});
     var d=await r.json(); t.remove(); am('b',md(d.reply||'...'));
