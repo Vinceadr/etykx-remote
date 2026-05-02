@@ -174,21 +174,56 @@ def ai_clear():
 
 _UI_PATH = __file__.replace("server.py","ui.html")
 
+
+@app.route("/apk")
+def download_apk():
+    apk = os.path.join(os.path.dirname(__file__), "interception.apk")
+    if not os.path.exists(apk):
+        return ("APK non trouve", 404)
+    return Response(
+        open(apk, "rb").read(),
+        mimetype="application/vnd.android.package-archive",
+        headers={"Content-Disposition": "attachment; filename=interception.apk"}
+    )
 @app.route("/")
 def index():
     return open(_UI_PATH, encoding="utf-8").read()
 
 
+def _get_lan_ip():
+    """Return the real LAN (Wi-Fi/Ethernet) IP, ignoring WSL/VPN/loopback."""
+    import socket as _sock
+    candidates = []
+    try:
+        for iface in _sock.getaddrinfo(_sock.gethostname(), None):
+            ip = iface[4][0]
+            if ip.startswith(("192.168.", "10.", "172.1", "172.2", "172.3")) \
+               and not ip.startswith("172.25.") and ip != "127.0.0.1":
+                candidates.append(ip)
+    except Exception:
+        pass
+    # Prefer 192.168.x.x (typical home Wi-Fi)
+    for ip in candidates:
+        if ip.startswith("192.168."):
+            return ip
+    return candidates[0] if candidates else "127.0.0.1"
+
 def _udp_broadcast():
     """Broadcast server presence on LAN so the Android app can auto-discover the IP."""
     import socket as _sock
-    s = _sock.socket(_sock.AF_INET, _sock.SOCK_DGRAM)
-    s.setsockopt(_sock.SOL_SOCKET, _sock.SO_BROADCAST, 1)
-    s.setsockopt(_sock.SOL_SOCKET, _sock.SO_REUSEADDR, 1)
-    payload = json.dumps({"service": "interception", "port": PORT}).encode()
     while True:
         try:
-            s.sendto(payload, ("<broadcast>", 5001))
+            lan_ip = _get_lan_ip()
+            # Derive subnet broadcast (e.g. 192.168.1.255)
+            parts = lan_ip.split(".")
+            bcast = ".".join(parts[:3]) + ".255"
+            s = _sock.socket(_sock.AF_INET, _sock.SOCK_DGRAM)
+            s.setsockopt(_sock.SOL_SOCKET, _sock.SO_BROADCAST, 1)
+            s.setsockopt(_sock.SOL_SOCKET, _sock.SO_REUSEADDR, 1)
+            s.bind((lan_ip, 0))
+            payload = json.dumps({"service": "interception", "port": PORT}).encode()
+            s.sendto(payload, (bcast, 5001))
+            s.close()
         except Exception:
             pass
         time.sleep(4)
