@@ -9,3 +9,4 @@ python-dotenv==1.0.1
 eventlet==0.40.0
 python-telegram-bot[all]==21.9
 openai==1.75.0
+zeroconf==0.132.2

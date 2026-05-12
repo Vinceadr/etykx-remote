@@ -90,9 +90,16 @@ public class SetupActivity extends AppCompatActivity {
                         conn.setReadTimeout(TIMEOUT);
                         conn.setRequestMethod("GET");
                         int code = conn.getResponseCode();
-                        conn.disconnect();
                         if (code == 200) {
-                            onPcFound(ip, String.valueOf(PORT));
+                            // Verify it's the Interception server (not just any HTTP server)
+                            java.io.InputStream is = conn.getInputStream();
+                            byte[] buf = new byte[256];
+                            int len = is.read(buf);
+                            String body = len > 0 ? new String(buf, 0, len) : "";
+                            conn.disconnect();
+                            if (body.contains("interception")) onPcFound(ip, String.valueOf(PORT));
+                        } else {
+                            conn.disconnect();
                         }
                     } catch (Exception ignored) {}
                 }
@@ -106,12 +113,32 @@ public class SetupActivity extends AppCompatActivity {
 
     private String getSubnet() {
         try {
-            WifiManager wm = (WifiManager) getApplicationContext()
-                    .getSystemService(Context.WIFI_SERVICE);
-            int ip = wm.getConnectionInfo().getIpAddress();
-            if (ip == 0) return null;
-            return String.format("%d.%d.%d.",
-                    ip & 0xFF, (ip >> 8) & 0xFF, (ip >> 16) & 0xFF);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                // API 31+ (Android 12+): WifiManager.getConnectionInfo() is deprecated
+                android.net.ConnectivityManager cm = (android.net.ConnectivityManager)
+                        getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+                android.net.Network network = cm.getActiveNetwork();
+                if (network == null) return null;
+                android.net.LinkProperties lp = cm.getLinkProperties(network);
+                if (lp == null) return null;
+                for (android.net.LinkAddress la : lp.getLinkAddresses()) {
+                    java.net.InetAddress addr = la.getAddress();
+                    if (addr instanceof java.net.Inet4Address && !addr.isLoopbackAddress()) {
+                        String[] parts = addr.getHostAddress().split("\\.");
+                        if (parts.length == 4)
+                            return parts[0] + "." + parts[1] + "." + parts[2] + ".";
+                    }
+                }
+                return null;
+            } else {
+                WifiManager wm = (WifiManager) getApplicationContext()
+                        .getSystemService(Context.WIFI_SERVICE);
+                @SuppressWarnings("deprecation")
+                int ip = wm.getConnectionInfo().getIpAddress();
+                if (ip == 0) return null;
+                return String.format("%d.%d.%d.",
+                        ip & 0xFF, (ip >> 8) & 0xFF, (ip >> 16) & 0xFF);
+            }
         } catch (Exception e) { return null; }
     }
 

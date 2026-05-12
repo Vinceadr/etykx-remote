@@ -53,7 +53,7 @@ jobs:
             1. Télécharge **`app-debug.apk`** ci-dessous ⬇️
             2. Sur ton téléphone : Paramètres → Sécurité → **Sources inconnues** ✅
             3. Installe l'APK
-            4. Entre l'IP de ton PC (`10.0.108.63`) et le port `5000`
+            4. Lance `start.ps1` sur le PC → l'app détecte le PC automatiquement
 
             > 💡 PC et téléphone doivent être sur le même Wi-Fi
           files: android/app/build/outputs/apk/debug/app-debug.apk

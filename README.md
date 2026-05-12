@@ -12,7 +12,7 @@ Contrôle ton PC Windows à distance depuis ton téléphone Android, avec stream
 ### Étape 2 — Télécharger l'APK
 Ouvre ce lien **directement sur ton téléphone** :
 
-👉 **https://github.com/Vinceadr/etykx-remote/releases/latest**
+👉 **https://github.com/etykx/etykx-remote/releases/latest**
 
 Appuie sur **`app-debug.apk`** pour télécharger.
 
